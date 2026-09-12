@@ -62,7 +62,7 @@ This journal records agreed project decisions, their context, and their conseque
 ### DEC-006 — Initial accrual and request-splitting policy
 
 - **Date:** 2026-09-12
-- **Status:** Confirmed — assistant-selected under explicit user delegation
+- **Status:** Superseded by DEC-011 for funding timing; accrual rate, calendar-day counting, carry-forward, and splitting rules retained
 - **Decision:** Accrue 28 calendar days per full year, daily from the employment start date using each calendar year's actual length. Count all dates in inclusive leave segments, including weekends and holidays. Carry unused days forward without expiry and disallow borrowing future accrual. Allow one or more non-overlapping whole-day segments of at least 1 day each, reviewed as a single request; no mandatory 14-day segment applies.
 - **Context / reason:** The user explicitly delegated definition of accrual and splitting rules. These defaults make proportional accrual and flexible segmentation straightforward to explain and calculate.
 - **Alternatives considered:** The user offered a mandatory 14-day segment as an example, not a requirement. It is not adopted in this initial policy.
@@ -72,7 +72,7 @@ This journal records agreed project decisions, their context, and their conseque
 ### DEC-007 — Proposed approval, reservation, and change workflows
 
 - **Date:** 2026-09-12
-- **Status:** Proposed
+- **Status:** Superseded by DEC-011 and DEC-012 for the updated implemented workflows
 - **Decision:** Reserve days on submission, require a manager comment for either review outcome, allow withdrawal and cancellation before leave starts, and retain original approved dates while replacement dates await approval. Apply the balance, access, and history defaults described in [PROJECT_SPEC.md](PROJECT_SPEC.md).
 - **Context / reason:** These proposed details keep balances consistent and avoid losing approved leave while a reschedule is under review.
 - **Consequences:** Implementation needs request history, atomic balance updates, and separate tracking of pending replacements. These workflow details remain subject to user confirmation.
@@ -105,12 +105,32 @@ This journal records agreed project decisions, their context, and their conseque
 - **Consequences:** Demo identities are not secure sign-in. Bind the preview to localhost and refuse production mode until authentication is implemented. Preserve profile administration, multi-company isolation, hosting, and top-level manager approval routing as open decisions. Add a direct journal download in the website.
 - **Source:** Assistant implementation defaults, subject to user refinement.
 
+### DEC-011 — Projected accrual, live calendars, and leave changes
+
+- **Date:** 2026-09-12
+- **Status:** Confirmed requirements — implementation details noted below
+- **Decision:** Show remaining days today and accrued/available days for a selected future date. Validate the entire request against accrual at its first segment's start, including existing commitments; reject invalid splitting or insufficient accrual with a clear explanation. Show managers overlapping approved leave in the employee's team. Update calendars for connected viewers without page refresh. Allow cancellation after leave starts, returning only unused days, and recalculate balances when the return-to-work date changes.
+- **Context / reason:** The user provided explicit expected behavior, replacing the initial prohibition on future accrual and on cancelling started leave.
+- **Implementation details:** Retain 28 calendar days annually, daily proportional accrual, carry-forward, and whole-day segments of at least one day. Check every booking deadline transactionally, so another request cannot spend entitlement needed by an existing booking. Display a nonnegative available balance and identify reservations funded by future accrual. Use Server-Sent Events with a shared database revision for live updates and reconnect catch-up.
+- **Cancellation convention (assistant-selected):** Before the first segment, release all days. Once leave has begun, retain dates through today and release dates from tomorrow onward, including later segments. Keep consumed dates in calendar history. Completed vacations cannot be edited.
+- **Return-date convention (assistant-selected):** The selected date is the first calendar day back, and leave ends the preceding day. Employees may request a return-date change for an upcoming or active segment, subject to manager approval and funding checks; past dates stay intact. Changes recalculate used/committed/remaining days. Gross accrual remains proportional to employment duration because paid leave still earns entitlement.
+- **Source:** User's expected-behavior list; conventions selected by the assistant to make the rules executable.
+
+### DEC-012 — One-time notifications and reminders
+
+- **Date:** 2026-09-12
+- **Status:** Confirmed notification requirements — channel and timing are assistant-selected defaults
+- **Decision:** Notify the manager once per new request and the employee once per approval/rejection. Remind both employee and manager once before approved vacation begins.
+- **Implementation details:** Use a persistent in-app inbox, with read state per recipient. Default reminder lead time is 3 calendar days, configurable via `REMINDER_DAYS` (1–30). Send one reminder per recipient for the whole vacation, before its first segment; replacement schedules share the original reminder identity, preventing another reminder for the same vacation. A 60-second server job runs without browser viewers, with startup and workspace-read catch-up while still before leave starts. Late approval within the lead window produces the reminder at the next check.
+- **Consequences:** Unique database deduplication keys and transactional writes prevent duplicate notifications. Request retry keys and idempotent decision retries prevent repeat delivery. The backend must be running for scheduled reminders; if restarted during the pre-start window it catches up. Cancelled, rejected, pending, or already-started requests do not receive new reminders. Email, SMS, and operating-system notifications are outside this implementation.
+- **Source:** User's expected-behavior list; delivery channel and reminder lead time selected by the assistant.
+
 ## Open questions
 
 - What visual design, interface language, and mobile priorities should guide the project?
 - What authentication, company isolation, and profile administration model should be used?
 - Who approves requests when an employee has no eligible assigned manager?
-- Should the proposed workflow defaults in DEC-007 be adopted or revised?
+- Should the default reminder lead time, cancellation cutoff, or notification channel be changed?
 - What backend framework, API style, ORM, hosting, and deployment setup should be used?
 
 ## Entry template

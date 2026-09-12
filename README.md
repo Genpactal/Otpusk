@@ -67,8 +67,16 @@ Restart the backend after changing `.env`. The Docker database is bound to local
 - Withdrawal, cancellation, and replacement schedules that retain the original approval while under review.
 - Employee balance overview, searchable HR balances, and downloadable decision journal.
 - Responsive layouts, keyboard-operable native dialogs, loading/error/empty states.
+- Selected-date accrual forecasts and funding checks at each vacation's first day, protecting other bookings.
+- Persistent in-app request/decision notifications, with transactionally enforced deduplication and read state.
+- One reminder per recipient before the first segment; the default is 3 calendar days (`REMINDER_DAYS`).
+- Manager review warnings for overlapping approved leave in the employee's team.
+- Live calendar updates via Server-Sent Events, including reconnect catch-up.
+- Cancellation of active leave that retains consumed days and returns only unused dates; manager-reviewed return-to-work changes.
 
 Company dates default to `Asia/Qyzylorda`, configurable with `COMPANY_TIMEZONE`. Balances use completed employment days and unrounded calculations; display values have two decimals. Pending requests expire on their first leave day, evaluated when the workspace is read or a request changes.
+
+The reminder job runs every 60 seconds in the backend, plus startup and workspace-read catch-up. Keep the server running to generate reminders on time. Reminders appear in the bell inbox; no email, SMS, or external messages are sent. Replacement requests share a reminder identity with the original vacation. Cancellation during leave keeps today charged and returns dates from tomorrow; an approved return-date change ends leave the day before the selected date.
 
 ## Project structure
 
@@ -94,6 +102,6 @@ Tests run against an isolated, in-memory PostgreSQL engine. They cover accrual, 
 
 This is a **local demo**, with an explicit `X-Demo-User` identity header and fictional data. It has role checks but no real sign-in: anyone with access to the demo can select an account. The server defaults to localhost and refuses `NODE_ENV=production` or `DEMO_MODE=false`. Real authentication and session management must replace the demo identities before deployment.
 
-The first version serves one company. Account provisioning, profile administration, notifications, multi-company isolation, HR overrides, and changes to already-started leave are not implemented. Schema creation is idempotent setup, not a versioned migration system. Workflow defaults remain open to refinement. Google Fonts are optional network-loaded assets; system fonts are used when unavailable.
+The first version serves one company. Account provisioning, profile administration, external notification channels, multi-company isolation, and HR overrides are not implemented. Schema setup applies additive, repeatable changes that preserve existing data, but is not yet a versioned migration system. Notification deduplication is enforced in PostgreSQL; standalone database deployment still needs its own environment verification. Workflow defaults remain open to refinement. Google Fonts are optional network-loaded assets; system fonts are used when unavailable.
 
 See [the specification](PROJECT_SPEC.md) and [decision journal](DECISION_LOG.md) for the agreed scope and assumptions.

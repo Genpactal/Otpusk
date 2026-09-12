@@ -128,15 +128,15 @@ test('cancelling original leave also withdraws a pending replacement', async () 
 test('concurrent requests cannot spend the same remaining days', async () => {
   const s = service();
   const results = await Promise.allSettled([
-    s.create('alex', { segments: [segment('2027-08-01', '2027-08-12')] }),
-    s.create('alex', { segments: [segment('2027-09-01', '2027-09-12')] }),
+    s.create('alex', { segments: [segment('2026-10-01', '2026-10-12')] }),
+    s.create('alex', { segments: [segment('2026-11-01', '2026-11-12')] }),
   ]);
   assert.equal(results.filter(r => r.status === 'fulfilled').length, 1);
   for (const result of results) if (result.status === 'fulfilled') await s.cancel('alex', result.value.id);
   assert.ok((await s.snapshot('alex')).balance.available >= 0);
 });
 test('past leave cannot be cancelled and another employee cannot cancel it', async () => {
-  await assert.rejects(service().cancel('alex', 'seed-alex-past'), /has not started/);
+  await assert.rejects(service().cancel('alex', 'seed-alex-past'), /Completed leave/);
   await assert.rejects(service().cancel('noah', 'seed-alex-upcoming'), /own leave/);
 });
 test('pending requests expire on their first day and release reservations', async () => {

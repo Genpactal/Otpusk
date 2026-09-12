@@ -11,7 +11,16 @@ const db = await openDatabase();
 await seedDatabase(db, todayIn(process.env.COMPANY_TIMEZONE || 'Asia/Qyzylorda'));
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 3001);
-const server = createApp(db).listen(port, host, () => console.log(`Otpusk API: http://${host}:${port} (${db.kind}, demo workspace)`));
-async function shutdown() { server.close(async () => { await db.close(); process.exit(0); }); }
+const app = createApp(db);
+await app.locals.service.runReminders();
+let reminderBusy = false;
+const reminderTimer = setInterval(async () => {
+  if (reminderBusy) return;
+  reminderBusy = true;
+  try { await app.locals.service.runReminders(); } catch (error) { console.error('Reminder check failed:', error.message); }
+  finally { reminderBusy = false; }
+}, 60000);
+const server = app.listen(port, host, () => console.log(`Otpusk API: http://${host}:${port} (${db.kind}, demo workspace)`));
+async function shutdown() { clearInterval(reminderTimer); app.locals.closeStreams(); server.close(async () => { await db.close(); process.exit(0); }); }
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
