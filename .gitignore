@@ -1,0 +1,8 @@
+node_modules/
+.pnpm-store/
+frontend/dist/
+.env
+.data/
+.sites-runtime/
+*.log
+artifacts/

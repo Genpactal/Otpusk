@@ -90,6 +90,8 @@ These are assistant-proposed defaults pending user confirmation; they do not cha
 
 ## Open decisions
 
+The working draft implements the workflow defaults above for review. See DEC-008 through DEC-010 in [the decision journal](DECISION_LOG.md) for implementation choices. The draft uses Express, a REST API, Vite, and a local PGlite preview with a standalone PostgreSQL option. It provides a fictional single-company workspace with demo account switching. These draft defaults do not settle production authentication, branding, tenancy, or hosting.
+
 - Visual design, interface language, and mobile layout priorities.
 - Authentication, account provisioning, and whether the first release serves one company or multiple isolated companies.
 - Who manages profiles, teams, manager assignments, and the company time zone.

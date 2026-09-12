@@ -78,6 +78,33 @@ This journal records agreed project decisions, their context, and their conseque
 - **Consequences:** Implementation needs request history, atomic balance updates, and separate tracking of pending replacements. These workflow details remain subject to user confirmation.
 - **Source:** Assistant proposal derived from the required features; not yet user-approved.
 
+### DEC-008 — Build the first working draft
+
+- **Date:** 2026-09-12
+- **Status:** Confirmed
+- **Decision:** Begin implementing a draft website using the documented architecture and leave tracking requirements.
+- **Context / reason:** The user approved moving from specification into a draft build.
+- **Consequences:** Implement the employee, manager, and HR views and their leave workflows. Use DEC-007 as the initial draft workflow baseline while retaining its proposed status for future refinement.
+- **Source:** User: "Great Now you can start building draft version of website."
+
+### DEC-009 — Draft tooling and local database setup
+
+- **Date:** 2026-09-12
+- **Status:** Implemented draft default — assistant-selected
+- **Decision:** Use Vite for the React frontend, Express with a REST API for the separate Node.js backend, and SQL shared by a standalone PostgreSQL adapter (`pg`) and an embedded PostgreSQL adapter (PGlite) for the local preview. Use pnpm with a committed lockfile.
+- **Context / reason:** The draft should run immediately in the current environment, where no standalone PostgreSQL or Docker executable was found. PGlite allows the same PostgreSQL schema and workflow logic to run locally without additional database setup.
+- **Consequences:** Local data persists under ignored `.data/`; setting `DATABASE_URL` selects a standalone PostgreSQL development database. Include Docker Compose and setup instructions. Embedded storage is a preview convenience, not a change to the agreed PostgreSQL architecture. Test the standalone adapter in its target environment before deployment.
+- **Source:** Assistant implementation choices within the authorized draft build.
+
+### DEC-010 — Visual direction and demo identity model
+
+- **Date:** 2026-09-12
+- **Status:** Implemented draft default — assistant-selected
+- **Decision:** Build an English-language, responsive workspace with forest-green accents, neutral surfaces, balance cards, leave lists, and monthly calendars. Use the fictional Forma Studio company and eight sample employees, with a visible demo account switcher.
+- **Context / reason:** Make the employee, manager, and HR flows easy to review before selecting production authentication, branding, or account administration.
+- **Consequences:** Demo identities are not secure sign-in. Bind the preview to localhost and refuse production mode until authentication is implemented. Preserve profile administration, multi-company isolation, hosting, and top-level manager approval routing as open decisions. Add a direct journal download in the website.
+- **Source:** Assistant implementation defaults, subject to user refinement.
+
 ## Open questions
 
 - What visual design, interface language, and mobile priorities should guide the project?
