@@ -41,11 +41,50 @@ This journal records agreed project decisions, their context, and their conseque
 - **Consequences:** Store the journal and its maintenance instructions in Git so their history can be tracked in the repository.
 - **Source:** User's repository connection request.
 
+### DEC-004 — Separate React frontend and Node.js backend with PostgreSQL
+
+- **Date:** 2026-09-12
+- **Status:** Confirmed
+- **Decision:** Use a client-server architecture with separate React frontend and Node.js backend applications, backed by PostgreSQL.
+- **Context / reason:** The user explicitly specified this architecture and stack; additional rationale was not specified.
+- **Consequences:** Business rules and database access belong to the backend. Backend framework, API style, ORM, authentication, and deployment choices remain open.
+- **Source:** User's architecture and product description.
+
+### DEC-005 — Company leave tracking product and required features
+
+- **Date:** 2026-09-12
+- **Status:** Confirmed
+- **Decision:** Build a company leave tracking service with employee profiles (start date, team, manager), proportional leave accrual, single-period or segmented requests, manager approval or rejection with comments, team calendars, an HR company calendar and employee balances, cancellation, and rescheduling.
+- **Context / reason:** Employees need to track entitlement and request leave, managers need to review requests, and HR needs a company-wide overview.
+- **Consequences:** Maintain the detailed requirements in [PROJECT_SPEC.md](PROJECT_SPEC.md). The product purpose and initial feature scope left open at kickoff are now defined.
+- **Source:** User's architecture and product description.
+
+### DEC-006 — Initial accrual and request-splitting policy
+
+- **Date:** 2026-09-12
+- **Status:** Confirmed — assistant-selected under explicit user delegation
+- **Decision:** Accrue 28 calendar days per full year, daily from the employment start date using each calendar year's actual length. Count all dates in inclusive leave segments, including weekends and holidays. Carry unused days forward without expiry and disallow borrowing future accrual. Allow one or more non-overlapping whole-day segments of at least 1 day each, reviewed as a single request; no mandatory 14-day segment applies.
+- **Context / reason:** The user explicitly delegated definition of accrual and splitting rules. These defaults make proportional accrual and flexible segmentation straightforward to explain and calculate.
+- **Alternatives considered:** The user offered a mandatory 14-day segment as an example, not a requirement. It is not adopted in this initial policy.
+- **Consequences:** Use precise balances internally and two decimals for display. The initial policy has no holiday-calendar dependency or half-day requests. Detailed rules and examples are in [PROJECT_SPEC.md](PROJECT_SPEC.md).
+- **Source:** User delegation for policy selection; concrete policy selected by the assistant.
+
+### DEC-007 — Proposed approval, reservation, and change workflows
+
+- **Date:** 2026-09-12
+- **Status:** Proposed
+- **Decision:** Reserve days on submission, require a manager comment for either review outcome, allow withdrawal and cancellation before leave starts, and retain original approved dates while replacement dates await approval. Apply the balance, access, and history defaults described in [PROJECT_SPEC.md](PROJECT_SPEC.md).
+- **Context / reason:** These proposed details keep balances consistent and avoid losing approved leave while a reschedule is under review.
+- **Consequences:** Implementation needs request history, atomic balance updates, and separate tracking of pending replacements. These workflow details remain subject to user confirmation.
+- **Source:** Assistant proposal derived from the required features; not yet user-approved.
+
 ## Open questions
 
-- What is Otpusk's purpose, and who will use it?
-- What should the first release include?
-- What design, technology, and hosting constraints should guide the project?
+- What visual design, interface language, and mobile priorities should guide the project?
+- What authentication, company isolation, and profile administration model should be used?
+- Who approves requests when an employee has no eligible assigned manager?
+- Should the proposed workflow defaults in DEC-007 be adopted or revised?
+- What backend framework, API style, ORM, hosting, and deployment setup should be used?
 
 ## Entry template
 
