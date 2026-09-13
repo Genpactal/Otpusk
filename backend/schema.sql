@@ -50,3 +50,13 @@ CREATE TABLE IF NOT EXISTS notifications (
 CREATE INDEX IF NOT EXISTS notifications_by_recipient ON notifications(recipient_id, created_at);
 CREATE TABLE IF NOT EXISTS workspace_revision (id INTEGER PRIMARY KEY CHECK (id=1), revision BIGINT NOT NULL DEFAULT 0);
 INSERT INTO workspace_revision (id, revision) VALUES (1,0) ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS account_credentials (
+  employee_id TEXT PRIMARY KEY REFERENCES employees(id),
+  password_hash TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS account_sessions (
+  token_hash TEXT PRIMARY KEY,
+  employee_id TEXT NOT NULL REFERENCES employees(id),
+  expires_at BIGINT NOT NULL
+);

@@ -5,7 +5,7 @@ import { createApp } from './app.js';
 
 try { process.loadEnvFile(); } catch (error) { if (error.code !== 'ENOENT') throw error; }
 if (process.env.NODE_ENV === 'production' || process.env.DEMO_MODE === 'false') {
-  throw new Error('This draft uses demo identities. Add real authentication before running in production.');
+  throw new Error('This local draft includes published demo credentials and privileged account switching. Production setup is not enabled.');
 }
 const db = await openDatabase();
 await seedDatabase(db, todayIn(process.env.COMPANY_TIMEZONE || 'Asia/Qyzylorda'));

@@ -4,6 +4,7 @@ import { openDatabase } from '../db.js';
 import { seedDatabase } from '../seed.js';
 import { createService } from '../service.js';
 import { createApp } from '../app.js';
+import { login } from './auth-helper.js';
 import { accruedDays, balanceFor, normalizeSegments } from '../policy.js';
 
 const TODAY = '2026-09-12';
@@ -152,11 +153,12 @@ test('HTTP API returns expected errors, protects role actions, and exports the j
   const root = `http://127.0.0.1:${server.address().port}`;
   try {
     assert.equal((await fetch(`${root}/api/workspace`)).status, 401);
-    const res = await fetch(`${root}/api/requests/seed-noah/review`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Demo-User': 'alex' }, body: JSON.stringify({ status: 'approved', comment: 'Test' }) });
+    const cookie = await login(root, 'alex');
+    const res = await fetch(`${root}/api/requests/seed-noah/review`, { method: 'POST', headers: { 'Content-Type': 'application/json', Cookie: cookie }, body: JSON.stringify({ status: 'approved', comment: 'Test' }) });
     assert.equal(res.status, 403);
-    const journal = await fetch(`${root}/api/decision-log`);
+    const journal = await fetch(`${root}/api/decision-log`, { headers: { Cookie: await login(root, 'sophie') } });
     assert.match(journal.headers.get('content-disposition'), /attachment/);
     assert.match(await journal.text(), /DEC-006/);
-    assert.equal((await fetch(`${root}/api/missing`)).status, 404);
+    assert.equal((await fetch(`${root}/api/missing`, { headers: { Cookie: cookie } })).status, 404);
   } finally { await new Promise(resolve => server.close(resolve)); }
 });

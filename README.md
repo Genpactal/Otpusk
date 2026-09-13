@@ -24,7 +24,7 @@ Open [the built preview](http://127.0.0.1:3001). Express serves the built React 
 
 ## Try the roles
 
-The top-right **demo account switcher** lets you explore the fictional Forma Studio workspace:
+Sign in with a fictional account's email and password. The role-specific demo credentials are recorded in `DECISION_LOG.md`. Employees see only their own account. Signed-in HR and managers retain the top-right **account switcher** and can explore any account in the fictional Forma Studio workspace:
 
 | Account | Role | Try this |
 | --- | --- | --- |
@@ -33,9 +33,25 @@ The top-right **demo account switcher** lets you explore the fictional Forma Stu
 | Sophie Chen | HR | View all employees' balances, search people, and filter the company calendar by team. |
 | James Wilson | Manager | Review requests from Engineering employees Leo and Emma. |
 
-The workspace seeds eight fictional employees and sample requests only when the database is empty. Seed dates are relative to the first launch date. Changes persist across reloads and restarts.
+The workspace seeds eight fictional employees and sample requests only when the database is empty. Seed dates are relative to the first launch date. Changes persist across reloads and restarts. Existing databases receive missing demo password hashes automatically without resetting passwords or leave data. Sessions last eight hours and survive server restarts; Sign out revokes the session. When switching, a banner shows the signed-in and selected accounts and offers a return action.
 
 Mila has no assigned manager and therefore cannot submit her own new requests. Her sample approved leave is an imported record. Approval routing for top-level managers is still a product decision.
+
+### Use two tabs together
+
+Open the same local website URL in two tabs in the same browser. Both tabs share one login: signing in or out in either tab updates the other automatically. Each tab can stay on its own page; HR/managers can also select a different account view in each tab. Leave requests, decisions, notifications, and calendars update live across connected tabs. Separate browsers or profiles can have independent logins.
+
+## Corporate documents
+
+Open **Corporate documents** in the sidebar after signing in. The shared mock library contains six readable/downloadable Markdown files across Getting started, Policies, and Templates, with search and folder filters. The actual files live in `corporate-documents/`; their catalogue is in `backend/documents.js`. All roles can read the library. Uploads and private employee files are not part of this draft.
+
+## Current project status and roadmap
+
+Otpusk is a working draft. The core leave-tracking criteria are covered, including profiles, accrual, requests, manager approval, calendars, HR overview, notifications, reminders, cancellation, rescheduling, login, shared browser sessions, and the mock corporate document library.
+
+To get started, run `pnpm install`, then `pnpm dev` from the repository root and open http://127.0.0.1:5173. Sign in with a fictional account from the project decision journal. Use `pnpm build` followed by `pnpm start` to run the built local preview.
+
+Planned next work includes email reminders; corporate events and parties; private employee records such as medical certificates and employment contracts; financial transparency for current salary and possible promotions; and integrations with Teams, Jira, banking systems, and other company tools. These areas were left for a later stage because cloud accounts, financial data, production databases, and mandatory corporate functions require additional security, product decisions, and complex integration work. The current draft is ready for local review and straightforward deployment once those decisions are made.
 
 ## Database
 
@@ -100,7 +116,7 @@ Tests run against an isolated, in-memory PostgreSQL engine. They cover accrual, 
 
 ## Draft boundaries
 
-This is a **local demo**, with an explicit `X-Demo-User` identity header and fictional data. It has role checks but no real sign-in: anyone with access to the demo can select an account. The server defaults to localhost and refuses `NODE_ENV=production` or `DEMO_MODE=false`. Real authentication and session management must replace the demo identities before deployment.
+This is a **local demo** with password sign-in, salted scrypt hashes, database-backed sessions, and fictional data. Employee sessions cannot switch accounts. HR and manager sessions can intentionally act as any demo account; business actions use that selected account's permissions and existing audit identity. `X-Demo-User` no longer grants access. The journal download is restricted to HR/managers because it contains intentionally shared demo passwords. The server defaults to localhost and refuses `NODE_ENV=production` or `DEMO_MODE=false`. Published demo passwords, broad switching, and missing account lifecycle controls mean production setup remains future work.
 
 The first version serves one company. Account provisioning, profile administration, external notification channels, multi-company isolation, and HR overrides are not implemented. Schema setup applies additive, repeatable changes that preserve existing data, but is not yet a versioned migration system. Notification deduplication is enforced in PostgreSQL; standalone database deployment still needs its own environment verification. Workflow defaults remain open to refinement. Google Fonts are optional network-loaded assets; system fonts are used when unavailable.
 

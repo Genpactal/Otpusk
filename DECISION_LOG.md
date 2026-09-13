@@ -9,7 +9,8 @@ This journal records agreed project decisions, their context, and their conseque
 - Give each decision a stable ID and a date in YYYY-MM-DD format.
 - Preserve earlier entries. When a decision changes, add a new entry and mark the earlier one as superseded, linking to the replacement.
 - Record the reason when known; otherwise say it has not yet been specified.
-- Keep credentials, secrets, and sensitive personal information out of this journal.
+- Keep real credentials, secrets, and sensitive personal information out of this journal. DEC-013 explicitly permits fictional local-demo login examples at the user's request.
+- Update the journal when requested, and do not reproduce or link it in chat unless the user explicitly asks to see or download it (DEC-014).
 
 ## Decisions
 
@@ -99,7 +100,7 @@ This journal records agreed project decisions, their context, and their conseque
 ### DEC-010 — Visual direction and demo identity model
 
 - **Date:** 2026-09-12
-- **Status:** Implemented draft default — assistant-selected
+- **Status:** Identity model superseded by DEC-013; visual direction retained
 - **Decision:** Build an English-language, responsive workspace with forest-green accents, neutral surfaces, balance cards, leave lists, and monthly calendars. Use the fictional Forma Studio company and eight sample employees, with a visible demo account switcher.
 - **Context / reason:** Make the employee, manager, and HR flows easy to review before selecting production authentication, branding, or account administration.
 - **Consequences:** Demo identities are not secure sign-in. Bind the preview to localhost and refuse production mode until authentication is implemented. Preserve profile administration, multi-company isolation, hosting, and top-level manager approval routing as open decisions. Add a direct journal download in the website.
@@ -125,10 +126,78 @@ This journal records agreed project decisions, their context, and their conseque
 - **Consequences:** Unique database deduplication keys and transactional writes prevent duplicate notifications. Request retry keys and idempotent decision retries prevent repeat delivery. The backend must be running for scheduled reminders; if restarted during the pre-start window it catches up. Cancelled, rejected, pending, or already-started requests do not receive new reminders. Email, SMS, and operating-system notifications are outside this implementation.
 - **Source:** User's expected-behavior list; delivery channel and reminder lead time selected by the assistant.
 
+### DEC-013 — Password login and privileged demo account switching
+
+- **Date:** 2026-09-13
+- **Status:** Confirmed behavior — implementation details are assistant-selected
+- **Decision:** Require password login. Employees access only their own account; HR and managers keep account switching. Record login/password examples for each role in this journal, as explicitly requested.
+- **Context / reason:** Replace unrestricted demo identity selection with employee login while retaining convenient role testing for HR and managers. Supersedes the identity model in DEC-010.
+- **Implementation details:** All eight fictional accounts sign in with their email and password. Store salted scrypt password hashes and hashed random session tokens in PostgreSQL. Use an HttpOnly, SameSite=Strict cookie with an eight-hour expiry, server-side logout, JSON-only mutations, and a per-process limit of ten unsuccessful login attempts per IP in fifteen minutes. Existing employee and leave data are preserved; missing credentials are added without resetting existing passwords. Live streams require the same session and recheck it for logout/expiry.
+- **Switching scope (assistant-selected interpretation):** A signed-in HR or manager may act as any of the eight demo accounts, including another manager or HR account. The selected account's existing leave permissions apply. Switching privilege comes from the original signed-in identity, so it remains available while viewing an employee. A visible banner identifies both accounts and offers a return action. Employees cannot switch through UI, headers, or stream URLs. The former `X-Demo-User` header no longer authenticates a request.
+- **Journal access (assistant-selected):** The website's journal download is available only to signed-in HR/managers because it contains the requested demonstration passwords. The repository journal remains a source file and these credentials are intentionally public demo examples.
+- **Consequences:** This remains a local fictional workspace; production startup remains disabled because credentials are documented and broad account switching is intentionally retained. Account invitations, password reset/change, disabling accounts, company isolation, and production hardening remain future work. Existing leave history records actions under the selected account; separate attribution to the original signed-in account is not yet implemented.
+- **Source:** User request to add employee login, keep switching for HR/managers, and document role login examples.
+
+#### Local demo login examples
+
+These are deliberately shared examples for fictional local accounts, not real company credentials. Do not reuse these passwords elsewhere.
+
+| Role | Account | Login email | Demo password |
+| --- | --- | --- | --- |
+| Employee | Alex Morgan | alex@studio.example | `Otpusk-alex-2026!` |
+| Employee | Olivia Rhye | olivia@studio.example | `Otpusk-olivia-2026!` |
+| Employee | Noah Williams | noah@studio.example | `Otpusk-noah-2026!` |
+| Employee | Leo Park | leo@studio.example | `Otpusk-leo-2026!` |
+| Employee | Emma Davis | emma@studio.example | `Otpusk-emma-2026!` |
+| Manager | Mila Thompson | mila@studio.example | `Otpusk-mila-2026!` |
+| Manager | James Wilson | james@studio.example | `Otpusk-james-2026!` |
+| HR | Sophie Chen | sophie@studio.example | `Otpusk-sophie-2026!` |
+
+### DEC-014 — Journal updates without displaying it in chat
+
+- **Date:** 2026-09-13
+- **Status:** Confirmed
+- **Decision:** Make requested journal edits and updates without showing the journal, its credentials, or a journal link in chat for now. Provide it when the user explicitly asks to view or download it.
+- **Context / reason:** The user asked to keep the journal maintained but not display it in the current conversation.
+- **Consequences:** Supplements DEC-002's downloadable journal requirement; changes remain in the project file and its history. A brief completion notice may mention that the journal was updated.
+- **Source:** User: "Edit and update journal when i ask but dont show in chat for now".
+
+### DEC-015 — Simultaneous clients with a shared browser login
+
+- **Date:** 2026-09-13
+- **Status:** Confirmed
+- **Decision:** Support two simultaneously open clients, including browser tabs. Tabs in the same browser share one login; independent accounts per tab are not required.
+- **Context / reason:** The user requested concurrent clients and explicitly selected "No, share one login across tabs" when asked about separate employee/manager logins.
+- **Implementation details:** Retain DEC-013's shared HttpOnly session cookie. After a successful login/logout, publish a random change marker through browser storage; other same-origin tabs immediately discard the old workspace/forms and check the server session. The marker contains no credentials or session token. Focus and API checks cover suspended tabs or unavailable storage. Ignore stale authentication checks and old-session API failures when a newer session change has already occurred.
+- **Consequences:** Logging out in either tab signs out both; logging in from either tab opens that account in both. Each tab keeps independent navigation and, for HR/managers, its own selected account view. Authorized leave changes continue to refresh connected views through Server-Sent Events. Concurrent retries retain one request/reservation and one notification per event through the existing transactional checks. Different browsers or browser profiles can still use separate sessions.
+- **Source:** User's simultaneous-client requirement and explicit shared-login preference.
+
+### DEC-016 — Shared corporate document folder with mock content
+
+- **Date:** 2026-09-13
+- **Status:** Confirmed feature — content and organization are assistant-selected
+- **Decision:** Add a corporate document folder for employees with mock data.
+- **Implementation details:** Add Corporate documents to the website navigation for all signed-in roles. Organize six fictional Forma Studio documents into Getting started, Policies, and Templates. Include a welcome guide, contact directory, leave guide, remote-work guide, information security checklist, and a completed example handover template. Provide search, folder filters, readable previews, and downloads. Store the actual Markdown files in the repository's `corporate-documents/` folder and serve them through authenticated API routes using an explicit document catalogue.
+- **Scope interpretation (assistant-selected):** These are shared company documents, not private employee personnel files. All content is labeled as mock data. The leave guide follows the draft's existing leave rules; other sample guidance does not establish a real company policy. Uploads, editing, version administration, and employee-specific file permissions are outside this initial folder.
+- **Consequences:** Users can read/download the sample library after login; anonymous access and arbitrary filesystem paths are rejected. The journal and its demo passwords remain separate from this employee library. Sample handover dates do not create leave requests.
+- **Source:** User: "Also add folder for employees corporate dcuments with mock data".
+
+### DEC-017 — Draft status, onboarding guidance, and future scope
+
+- **Date:** 2026-09-13
+- **Status:** Confirmed project communication
+- **Decision:** Label Otpusk as a working draft, explain how to start it locally, and document the completed core criteria, planned next work, and current omissions in the main README and every mock corporate document.
+- **Context / reason:** The user requested a clear project-stage block in the corporate documents and described the current progress, future ideas, and reasons for deferred work.
+- **Current state:** The draft covers the main leave-tracking criteria: employee profiles, accrual, requests, manager approval, team and HR calendars, notifications, reminders, cancellation, rescheduling, password login, shared browser sessions, and a mock corporate document library. Local startup is `pnpm install` then `pnpm dev`; a built preview uses `pnpm build` then `pnpm start`.
+- **Future scope:** Email reminders through an external channel; corporate events and parties; private employee documents such as medical certificates and employment contracts; employee financial transparency for current salary and possible promotions; and integrations with Teams, Jira, banking systems, and other company tools.
+- **Deferred scope and reason:** Cloud account connections, financial data, production database concerns, and mandatory corporate functions were deferred because they require additional security, product decisions, permissions, and complex integration work. The current draft is intentionally ready for local review and straightforward deployment after those decisions.
+- **Communication note:** The user's personal explanation about a recent laptop purchase and illness is treated as context for the project update, not as a product requirement or a claim in user-facing corporate policy content. Mock documents explicitly state that they are examples and do not create real policy, employment terms, leave requests, or assignments.
+- **Source:** User's request to add draft status/getting-started blocks and their description of what is planned, complete, and deferred.
+
 ## Open questions
 
 - What visual design, interface language, and mobile priorities should guide the project?
-- What authentication, company isolation, and profile administration model should be used?
+- What production authentication, company isolation, and profile administration model should be used beyond DEC-013's local password login and privileged switching?
 - Who approves requests when an employee has no eligible assigned manager?
 - Should the default reminder lead time, cancellation cutoff, or notification channel be changed?
 - What backend framework, API style, ORM, hosting, and deployment setup should be used?

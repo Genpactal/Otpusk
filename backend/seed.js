@@ -1,4 +1,5 @@
 import { addDays } from './policy.js';
+import { seedDemoCredentials } from './auth.js';
 
 export async function seedDatabase(db, today) {
   await db.transaction(async tx => {
@@ -31,4 +32,5 @@ export async function seedDatabase(db, today) {
       await tx.query('INSERT INTO request_events (request_id,actor_id,action,comment,created_at) VALUES ($1,$2,$3,$4,$5)', [id, employee, 'imported', 'Sample request for the draft workspace.', `${addDays(today, -7)}T10:00:00.000Z`]);
     }
   });
+  await seedDemoCredentials(db);
 }

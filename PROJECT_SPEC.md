@@ -107,9 +107,13 @@ These workflows implement the user's expected behavior. Reminder timing, deliver
 - Team calendar entries show employee names and approved dates. Review comments are restricted to the employee, assigned manager, and HR.
 - Keep a history of submissions, decisions, cancellations, and schedule changes, including actor, timestamp, and relevant comments.
 
+## Corporate documents
+
+All signed-in roles can browse a shared employee document library containing six mock guides and templates. The Corporate documents page provides folder filters, search, readable previews, and Markdown downloads. The files are stored in `corporate-documents/` and are accessible through authenticated API routes. This initial library contains shared company material; private personnel files, uploads, and document editing are not included. See DEC-016.
+
 ## Open decisions
 
-The working draft implements the requirements and conventions above. See DEC-008 through DEC-012 in [the decision journal](DECISION_LOG.md) for implementation choices. The draft uses Express, a REST API, Vite, and a local PGlite preview with a standalone PostgreSQL option. It provides a fictional single-company workspace with demo account switching. These draft defaults do not settle production authentication, branding, tenancy, or hosting.
+The working draft implements the requirements and conventions above. See DEC-008 through DEC-017 in [the decision journal](DECISION_LOG.md) for implementation choices. The draft uses Express, a REST API, Vite, and a local PGlite preview with a standalone PostgreSQL option. All accounts use email/password login and eight-hour server-backed sessions. Employees are restricted to their own accounts; HR and managers retain switching to any fictional account, with a signed-in identity banner and return action. The journal contains the requested demo credentials, and its website download is restricted to HR/managers. These local draft defaults do not settle production authentication, branding, tenancy, or hosting.
 
 - Visual design, interface language, and mobile layout priorities.
 - Authentication, account provisioning, and whether the first release serves one company or multiple isolated companies.

@@ -4,6 +4,7 @@ import { openDatabase } from '../db.js';
 import { seedDatabase } from '../seed.js';
 import { createService } from '../service.js';
 import { createApp } from '../app.js';
+import { login } from './auth-helper.js';
 import { accruedDays } from '../policy.js';
 
 const today = '2026-09-12';
@@ -137,7 +138,7 @@ test('SSE notifies every connected viewer after an approved calendar change', as
   const base = `http://127.0.0.1:${server.address().port}`;
   const controllers = [new AbortController(), new AbortController()];
   try {
-    const streams = await Promise.all(['alex', 'noah'].map((id, index) => fetch(`${base}/api/stream?user=${id}`, { signal: controllers[index].signal })));
+    const streams = await Promise.all(['alex', 'noah'].map(async (id, index) => fetch(`${base}/api/stream?user=${id}`, { headers: { Cookie: await login(base, id) }, signal: controllers[index].signal })));
     const readers = streams.map(r => r.body.getReader());
     for (const reader of readers) assert.match(new TextDecoder().decode((await reader.read()).value), /event: change/);
     const s = app.locals.service, r = await s.create('alex', { segments: [seg('2026-11-01')] });
